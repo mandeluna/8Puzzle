@@ -4,8 +4,10 @@ import java.util.Iterator;
 public class Board {
 	int n; // board is n x n tiles
 	int[] tiles;
+	// sentinels for caching calculations
 	int manhattan = -1;
 	int hamming = -1;
+	int goal = -1;
 
 	// construct a board from an n-by-n array of blocks
     // (where blocks[i][j] = block in row i, column j)
@@ -63,7 +65,7 @@ public class Board {
 
 	// number of blocks out of place
 	public int hamming() {
-		if (hamming > 0) {
+		if (hamming >= 0) {
 			return hamming;
 		}
 		hamming = 0;
@@ -79,7 +81,7 @@ public class Board {
 
 	// sum of Manhattan distances between blocks and goal
 	public int manhattan() {
-		if (manhattan > 0) {
+		if (manhattan >= 0) {
 			return manhattan;
 		}
 		manhattan = 0;
@@ -96,6 +98,11 @@ public class Board {
 
 	// is this board the goal board?
 	public boolean isGoal() {
+		if (goal >= 0) {
+			return (goal == 1);
+		}
+		// it's most important to cache the negative case
+		goal = 0;
     	for (int i = 0; i < n; i++) {
     		for (int j = 0; j < n; j++) {
     			 if (!isBlank(i, j) && (getTile(i, j) != (i * n) + (j + 1))) {
@@ -103,6 +110,7 @@ public class Board {
     			 }
      		}
     	}
+    	goal = 1;
     	return true;
 }
 
