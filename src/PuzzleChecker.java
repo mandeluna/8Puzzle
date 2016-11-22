@@ -48,8 +48,10 @@ public class PuzzleChecker {
 
             // solve the slider puzzle
             Board initial = new Board(tiles);
+            long now = System.nanoTime();
             Solver solver = new Solver(initial);
-            StdOut.println(filename + ": " + solver.moves());
+            long delta = System.nanoTime() - now;
+            StdOut.printf("%s: %d (%5.2f ms)\n", filename, solver.moves(), (float) delta / 1000000);
         }
     }
 }
