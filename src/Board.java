@@ -9,7 +9,6 @@ public class Board {
 	// sentinels for caching calculations
 	int manhattan = -1;
 	int hamming = -1;
-	int goal = -1;
 
 	// 16-bit values use 1/2 as much memory as ints
 	char[] tiles;
@@ -105,20 +104,7 @@ public class Board {
 
 	// is this board the goal board?
 	public boolean isGoal() {
-		if (goal >= 0) {
-			return (goal == 1);
-		}
-		// it's most important to cache the negative case
-		goal = 0;
-    	for (int i = 0; i < n; i++) {
-    		for (int j = 0; j < n; j++) {
-    			 if (!isBlank(i, j) && (getTile(i, j) != (i * n) + (j + 1))) {
-    				 return false;
-    			 }
-     		}
-    	}
-    	goal = 1;
-    	return true;
+    	return hamming() == 0;
 }
 
 	// a board that is obtained by exchanging any pair of blocks

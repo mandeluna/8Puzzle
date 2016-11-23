@@ -16,10 +16,12 @@ public class Solver {
 	int moves = -1;
 	private MinPQ<SearchNode> queue = new MinPQ<>(new MoveComparator());
 	private MinPQ<SearchNode> queue2 = new MinPQ<>(new MoveComparator());
-	private Set<Board> visited = new HashSet<>();
-	private Set<Board> visited2 = new HashSet<>();
-//	Board lastVisited = null;
+    private Set<Board> visited = new HashSet<>();
+    private Set<Board> visited2 = new HashSet<>();
 //	private List<Board> visited = new ArrayList<>();
+//	private List<Board> visited2 = new ArrayList<>();
+//	Board lastVisited = null;
+//    Board lastVisited2 = null;
 
 	// find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
@@ -31,13 +33,16 @@ public class Solver {
     	queue2.insert(new SearchNode(initial.twin(), null, 0));
 
 		while (!queue.isEmpty()) {
+
+//		    printQueue(queue);
+
 	    	SearchNode node = queue.min();
 	    	Board curr = node.board;
 	    	SearchNode node2 = queue2.min();
 	    	Board twin = node2.board;
 	    	// number of moves will be the same for both trees
 	    	moves = node.moves;
-	    	
+
     		if (curr.isGoal()) {
     			solved = true;
     			break;
@@ -62,6 +67,34 @@ public class Solver {
 		}
     }
 
+    private void printQueue(MinPQ<SearchNode> queue) {
+        List<String> rows = new ArrayList<>();
+
+        int col = 1;
+        for (SearchNode node : queue) {
+            int colwidth = node.board.dimension() * 4 + 5;
+            String[] recs = node.toString().split("\n");
+            for (int i = 0; i < recs.length; i++) {
+                String row = (rows.size() <= i) ? recs[i] : rows.get(i) + recs[i];
+                String element = row;
+                for (int c = 0; c < col * colwidth - row.length(); c++) {
+                    element += ' ';
+                }
+                if (rows.size() <= i) {
+                    rows.add(element);
+                }
+                else {
+                    rows.set(i, element);
+                }
+            }
+            col++;
+        }
+        for (String row : rows) {
+            StdOut.println(row);
+        }
+        StdOut.println();
+    }
+
     private boolean isVisited2(Board board) {
     	return visited2.contains(board);
 //    	return lastVisited2.equals(board);
@@ -69,7 +102,7 @@ public class Solver {
 
     private void visited2(Board board) {
 		visited2.add(board);
-//		lastVisited2 = curr;
+//		lastVisited2 = board;
     }
 
     private boolean isVisited(Board board) {
@@ -79,7 +112,7 @@ public class Solver {
 
     private void visited(Board board) {
 		visited.add(board);
-//		lastVisited = curr;
+//		lastVisited = board;
     }
 
     // is the initial board solvable?
@@ -145,24 +178,51 @@ public class Solver {
     		this.previous = previous;
     		this.moves = moves;
     	}
+
+    	private int priority() {
+            return board.manhattan() + moves;
+    	}
+
+    	public String toString() {
+            //  priority  = 4
+            //  moves     = 0
+            //  manhattan = 4
+            //  3            
+            //   0  1  3     
+            //   4  2  5     
+            //   7  8  6  
+
+    	    StringBuilder builder = new StringBuilder();
+    	    builder.append(String.format("priority  = %d\n", priority()));
+            builder.append(String.format("moves     = %d\n", moves));
+            builder.append(String.format("manhattan = %d\n", board.manhattan()));
+            builder.append(this.board);
+            return builder.toString();
+    	}
     }
 
     private class MoveComparator implements Comparator<SearchNode> {
 		@Override
         public int compare(SearchNode o1, SearchNode o2) {
-			if (o1.board.isGoal()) {
+		    // are we almost at the goal
+            if (o1.board.isGoal()) {
+                return -1;
+            }
+            if (o2.board.isGoal()) {
+                return 1;
+            }
+			if (Math.abs(o1.board.manhattan()) <= 1) {
 				return -1;
 			}
-			if (o2.board.isGoal()) {
+			if (Math.abs(o2.board.manhattan()) <= 1) {
 				return 1;
 			}
-			// increase weight to find non-minimal solutions (faster) e.g. (o1.moves + o2.moves + 2) / 2;
-			int weight = 1;
-	        int score1 = o1.board.manhattan() * weight + o1.moves;
-	        int score2 = o2.board.manhattan() * weight + o2.moves;
+			int d = o1.board.dimension();
+	        int score1 = o1.priority();
+	        int score2 = o2.priority();
 	        if (score1 == score2) {
-	        	score1 = o1.board.hamming() * weight + o1.moves;
-	        	score2 = o2.board.hamming() * weight + o2.moves;
+	        	score1 = o1.board.hamming() * d + o1.moves;
+	        	score2 = o2.board.hamming() * d + o2.moves;
 	        }
 	        return score1 - score2;
         }
