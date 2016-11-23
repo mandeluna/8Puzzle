@@ -1,13 +1,18 @@
 import java.util.Iterator;
 
+import edu.princeton.cs.algs4.StdOut;
+
 
 public class Board {
 	int n; // board is n x n tiles
-	int[] tiles;
+
 	// sentinels for caching calculations
 	int manhattan = -1;
 	int hamming = -1;
 	int goal = -1;
+
+	// 16-bit values use 1/2 as much memory as ints
+	char[] tiles;
 
 	// construct a board from an n-by-n array of blocks
     // (where blocks[i][j] = block in row i, column j)
@@ -21,8 +26,10 @@ public class Board {
     	}
 
     	this.n = blocks.length;
+    	this.tiles = new char[n*n];
+    	int bits = (int) Math.ceil(Math.log(tiles.length) / Math.log(2));
+//    	StdOut.printf("%d tiles require %d bits per tile\n", tiles.length, bits);
 
-    	this.tiles = new int[n*n];
     	for (int i = 0; i < n; i++) {
     		if (blocks[i].length != n) {
     			throw new IllegalArgumentException("Only square boards can be used");
@@ -35,7 +42,7 @@ public class Board {
 
     // private constructor for creating new boards without the overhead of copying the tiles
     // it is the caller's responsibility to duplicate the tiles during move generation
-    private Board(int[] tiles) {
+    private Board(char[] tiles) {
     	this.n = (int) Math.sqrt(tiles.length);
     	assert (n * n == tiles.length);
     	this.tiles = tiles;
@@ -51,7 +58,7 @@ public class Board {
 
 	private void setTile(int i, int j, int k) {
 		assert (k >= 0) && (k < n*n);
-		tiles[index(i, j)] = (byte) k;
+		tiles[index(i, j)] = (char) k;
     }
 
     private boolean isBlank(int i, int j) {
@@ -116,7 +123,7 @@ public class Board {
 
 	// a board that is obtained by exchanging any pair of blocks
 	public Board twin() {
-		int[] copy = this.tiles.clone();
+		char[] copy = this.tiles.clone();
 		int first = 0;
 		int second = 1;
 		// make sure we don't swap the blank tile
@@ -213,7 +220,7 @@ public class Board {
 					@Override
                     public Board next() {
 						// create new board to play with
-						int[] copy = tiles.clone();
+						char[] copy = tiles.clone();
 						// swap blank tile with neighboring tile
 						int row = nij[currIndex][0];
 						int col = nij[currIndex][1];
@@ -236,8 +243,8 @@ public class Board {
 		};
 	}
 
-	private void swap(int[] copy, int a, int b) {
-		int t = copy[a];
+	private void swap(char[] copy, int a, int b) {
+		char t = copy[a];
 		copy[a] = copy[b];
 		copy[b] = t;
     }
