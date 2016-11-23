@@ -11,8 +11,12 @@ public class TestNeighbors {
 		Board north = new Board(new int[][]{{1, 2, 3}, {4, 5, 0}, {7, 8, 6}});
 		Board east = new Board(new int[][]{{1, 2, 3}, {4, 5, 6}, {7, 0, 8}});
 		Board[] boards = new Board[]{north, east};
+		int[] hammings = new int[]{1, 1};
+		int[] manhattans = new int[]{1, 1};
 		int index = 0;
 		for (Board neighbor : board.neighbors()) {
+			assertTrue(neighbor.manhattan() == manhattans[index]);
+			assertTrue(neighbor.hamming() == hammings[index]);
 			assertTrue(neighbor.equals(boards[index++]));
 		}
 		assertTrue(index == 2);
